@@ -1,0 +1,82 @@
+<!DOCTYPE HTML> 
+<html lang="en"> 
+<head>
+<title>Teapot</title>
+<meta charset="utf-8"> 
+</head>
+    
+<script type="x-shader/x-vertex" id="shader-vs">
+     uniform mat4 uPMatrix;
+     uniform mat4 uMVMatrix;
+     
+     attribute vec3 aVertexPosition;
+     attribute vec3 aVertexNormal;
+     
+     varying vec3 viewCoords;
+     varying vec3 vVertexNormal;
+     
+     void main() {
+        vec4 eyeCoords = uMVMatrix * vec4(aVertexPosition,1.0);
+        gl_Position = uPMatrix * eyeCoords;
+        viewCoords = eyeCoords.xyz;
+        vVertexNormal = aVertexNormal;
+     }
+</script>
+<script type="x-shader/x-fragment" id="shader-fs">
+     precision mediump float;
+     
+     varying vec3 vCoords;
+     varying vec3 vVertexNormal;
+     varying vec3 viewCoords;
+     
+     uniform samplerCube skybox;
+     uniform mat3 uNMatrix;
+     uniform mat3 invVT;
+     
+     void main() {
+          vec3 R = invVT * (2.0 * dot((-viewCoords),(uNMatrix * vVertexNormal)) * (uNMatrix * vVertexNormal) - (-viewCoords));
+          gl_FragColor = textureCube(skybox, R);
+     }
+     
+</script>
+    <!--Sky Box-->
+<script type="x-shader/x-vertex" id="sb-shader-vs">
+     uniform mat4 uPMatrix;
+     uniform mat4 uMVMatrix;
+     attribute vec3 aVertexPosition;
+     
+     varying vec3 vVertexNormal;
+     
+     void main() {
+        vec4 eyeCoords = uMVMatrix * vec4(aVertexPosition,1.0);
+        gl_Position = uPMatrix * eyeCoords;
+        vVertexNormal = aVertexPosition;
+     }
+</script>
+    
+<!--Sky Box-->
+<script type="x-shader/x-fragment" id="sb-shader-fs">
+     precision mediump float;
+     
+     varying vec3 vVertexNormal;
+     
+     uniform samplerCube skybox;
+     
+     void main() {
+          gl_FragColor = textureCube(skybox, vVertexNormal);
+     }
+</script>
+    
+<script type="text/javascript" src="gl-matrix-min.js"></script>
+<script type="text/javascript" src="webgl-utils.js"></script>
+<script type="text/javascript" src="teapot.js"></script>
+<script type="text/javascript" src="mp3.js"></script>
+<body onload="startup()" >
+    <center> 
+        <canvas width="650" height="600" id="myGLCanvas"></canvas>
+        <p>Use arrow keys to see around<br>Use ASWD  to move the tea pot</p>
+        <input type="radio" name="Ref" id="Reflective" value="Reflective" > Reflective
+        <input type="radio" name="Ref" id="NReflective" value="NReflective" checked> None Reflective
+    </center>
+</body>
+</html>
